@@ -4,14 +4,13 @@ import freemarker.template.Configuration
 import freemarker.template.Template
 import groovy.util.logging.Slf4j
 import org.apache.commons.io.FilenameUtils
+import org.apache.commons.io.IOUtils
 import ru.yandex.qatools.allure.data.AllureReportInfo
 import ru.yandex.qatools.allure.data.AllureTestCase
 import ru.yandex.qatools.allure.data.AttachmentInfo
 import ru.yandex.qatools.allure.data.ReportGenerationException
 import ru.yandex.qatools.allure.data.plugins.PluginData
 import ru.yandex.qatools.commons.model.Environment
-
-import java.nio.file.Files
 
 import static ru.yandex.qatools.allure.data.utils.AllureReportUtils.createDirectory
 import static ru.yandex.qatools.allure.data.utils.AllureReportUtils.serialize
@@ -88,8 +87,9 @@ class ReportWriter {
         Objects.requireNonNull(attachmentInfo)
         try {
             File from = new File(attachmentInfo.path);
+            InputStream is = new FileInputStream(from)
             getStreamToDataDirectory(attachmentInfo.source).withCloseable { output ->
-                Files.copy(from.toPath(), output)
+                IOUtils.copy(is, output)
             }
         } catch (IOException e) {
             log.error("Can't copy attachment $attachmentInfo.source from $attachmentInfo.path", e)

@@ -5,15 +5,13 @@ import io.airlift.airline.Command;
 import org.apache.commons.exec.CommandLine;
 import org.apache.commons.exec.DefaultExecutor;
 import org.apache.commons.exec.util.StringUtils;
+import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ru.yandex.qatools.allure.commons.AllureFileUtils;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
+import java.io.*;
 import java.net.MalformedURLException;
-import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -99,7 +97,8 @@ public class ReportGenerate extends ReportCommand {
             output.putNextEntry(new JarEntry("allure.properties"));
             File allureConfig = PROPERTIES.getAllureConfig();
             if (allureConfig.exists()) {
-                byte[] bytes = Files.readAllBytes(allureConfig.toPath());
+                InputStream is = new FileInputStream(allureConfig);
+                byte[] bytes = IOUtils.toByteArray(is);
                 output.write(bytes);
             }
             output.closeEntry();
