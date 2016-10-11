@@ -1,8 +1,11 @@
 package ru.yandex.qatools.allure.testng;
 
-import org.junit.*;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 import org.testng.TestNG;
 
+import ru.yandex.qatools.allure.commons.AllureFileUtils;
 import ru.yandex.qatools.allure.config.AllureModelUtils;
 import ru.yandex.qatools.allure.testng.testdata.TestDataClass;
 import ru.yandex.qatools.allure.utils.AllureResultsUtils;
@@ -10,8 +13,8 @@ import ru.yandex.qatools.allure.utils.AllureResultsUtils;
 import javax.xml.transform.stream.StreamSource;
 import javax.xml.validation.Validator;
 
-import java.io.*;
-import java.nio.file.*;
+import java.io.File;
+import java.io.IOException;
 
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
@@ -26,12 +29,12 @@ public class AllureTestListenerXmlValidationTest {
     private static final String DEFAULT_SUITE_NAME = "suite";
     private static final String ALLURE_RESULTS = "allure-results";
 
-    private static Path resultsDir;
+    private static File resultsDir;
 
     @Before
     public void setUp() throws IOException {
-        resultsDir = Files.createTempDirectory(ALLURE_RESULTS);
-        AllureResultsUtils.setResultsDirectory(resultsDir.toFile());
+        resultsDir = AllureFileUtils.createTempDirectory(ALLURE_RESULTS);
+        AllureResultsUtils.setResultsDirectory(resultsDir);
 
         TestNG testNG = new TestNG();
         testNG.setDefaultSuiteName(DEFAULT_SUITE_NAME);
@@ -44,19 +47,19 @@ public class AllureTestListenerXmlValidationTest {
     @After
     public void tearDown() throws IOException {
         AllureResultsUtils.setResultsDirectory(null);
-        AllureTestUtils.deleteNotEmptyDirectory(resultsDir);
+        AllureFileUtils.deleteDirectory(resultsDir);
     }
 
     @Test
     public void suiteFilesCountTest() throws Exception {
-        assertThat(listTestSuiteFiles(resultsDir.toFile()).size(), is(1));
+        assertThat(listTestSuiteFiles(resultsDir).size(), is(1));
     }
 
     @Test
     public void validateSuiteFilesTest() throws Exception {
         Validator validator = AllureModelUtils.getAllureSchemaValidator();
 
-        for (File each : listTestSuiteFiles(resultsDir.toFile())) {
+        for (File each : listTestSuiteFiles(resultsDir)) {
             validator.validate(new StreamSource(each));
         }
     }

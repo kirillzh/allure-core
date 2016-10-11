@@ -22,15 +22,15 @@ public class TestSuiteStorageTest {
     @Test
     public void getTest() throws Exception {
         TestSuiteResult testSuite = testSuiteStorage.get("a");
-        assertTrue(testSuite == testSuiteStorage.get("a"));
-        assertFalse(testSuite == testSuiteStorage.get("b"));
+        assertSame(testSuite, testSuiteStorage.get("a"));
+        assertNotSame(testSuite, testSuiteStorage.get("b"));
     }
 
     @Test
     public void removeTest() throws Exception {
         TestSuiteResult testSuite = testSuiteStorage.get("a");
-        assertTrue(testSuite == testSuiteStorage.get("a"));
+        assertSame(testSuite, testSuiteStorage.get("a"));
         testSuiteStorage.remove("a");
-        assertFalse(testSuite == testSuiteStorage.get("a"));
+        assertNotSame(testSuite, testSuiteStorage.get("a"));
     }
 }

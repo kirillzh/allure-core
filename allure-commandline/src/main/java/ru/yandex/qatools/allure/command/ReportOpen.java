@@ -12,10 +12,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.awt.*;
+import java.io.File;
 import java.io.IOException;
 import java.net.URI;
-import java.nio.file.Files;
-import java.nio.file.Path;
 
 /**
  * @author Artem Eroshenko <eroshenkoam@yandex-team.ru>
@@ -31,8 +30,8 @@ public class ReportOpen extends ReportCommand {
 
     @Override
     protected void runUnsafe() throws Exception {
-        Path reportDirectory = getReportDirectoryPath();
-        if (Files.notExists(reportDirectory)) {
+        File reportDirectory = getReportDirectoryPath();
+        if (!reportDirectory.exists()) {
             throw new AllureCommandException(String.format(
                     "Can't open report: directory <%s> doesn't exist.", reportDirectory
             ));
@@ -67,7 +66,7 @@ public class ReportOpen extends ReportCommand {
         ResourceHandler handler = new ResourceHandler();
         handler.setDirectoriesListed(true);
         handler.setWelcomeFiles(new String[]{"index.html"});
-        handler.setResourceBase(getReportDirectoryPath().toAbsolutePath().toString());
+        handler.setResourceBase(getReportDirectoryPath().getAbsolutePath());
         HandlerList handlers = new HandlerList();
         handlers.setHandlers(new Handler[]{handler, new DefaultHandler()});
         server.setStopAtShutdown(true);

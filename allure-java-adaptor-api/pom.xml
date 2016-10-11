@@ -49,6 +49,11 @@
             <artifactId>slf4j-nop</artifactId>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>ru.yandex.qatools.allure</groupId>
+            <artifactId>allure-commons</artifactId>
+            <version>1.4.24-SNAPSHOT</version>
+        </dependency>
     </dependencies>
 
     <build>

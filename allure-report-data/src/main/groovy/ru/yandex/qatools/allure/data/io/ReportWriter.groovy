@@ -12,8 +12,6 @@ import ru.yandex.qatools.allure.data.plugins.PluginData
 import ru.yandex.qatools.commons.model.Environment
 
 import java.nio.file.Files
-import java.nio.file.Path
-import java.nio.file.Paths
 
 import static ru.yandex.qatools.allure.data.utils.AllureReportUtils.createDirectory
 import static ru.yandex.qatools.allure.data.utils.AllureReportUtils.serialize
@@ -89,9 +87,9 @@ class ReportWriter {
     void write(AttachmentInfo attachmentInfo) {
         Objects.requireNonNull(attachmentInfo)
         try {
-            Path from = Paths.get(attachmentInfo.path)
+            File from = new File(attachmentInfo.path);
             getStreamToDataDirectory(attachmentInfo.source).withCloseable { output ->
-                Files.copy(from, output)
+                Files.copy(from.toPath(), output)
             }
         } catch (IOException e) {
             log.error("Can't copy attachment $attachmentInfo.source from $attachmentInfo.path", e)

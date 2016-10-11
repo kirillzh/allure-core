@@ -1,10 +1,10 @@
 package ru.yandex.qatools.allure;
 
-import com.google.common.io.Files;
 import com.google.common.reflect.ClassPath;
 import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import ru.yandex.qatools.allure.commons.AllureFileUtils;
 import ru.yandex.qatools.allure.data.AllureReportGenerator;
 
 import java.io.File;
@@ -63,7 +63,7 @@ public class AllureMain {
             if (matcher.find()) {
                 String resourcePath = matcher.group(1);
                 File dest = new File(outputDirectory, resourcePath);
-                Files.createParentDirs(dest);
+                AllureFileUtils.createParentDirs(dest);
                 try (FileOutputStream output = new FileOutputStream(dest);
                      InputStream input = info.url().openStream()) {
                     IOUtils.copy(input, output);

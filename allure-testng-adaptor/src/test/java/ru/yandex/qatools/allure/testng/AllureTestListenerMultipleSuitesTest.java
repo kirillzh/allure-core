@@ -19,8 +19,6 @@ import javax.xml.validation.Validator;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.List;
 
 import static org.hamcrest.core.IsEqual.equalTo;
@@ -36,12 +34,12 @@ public class AllureTestListenerMultipleSuitesTest {
     private static final String SUITE2 = "/suite2.xml";
     private static final String ALLURE_RESULTS = "allure-results";
 
-    private static Path resultsDir;
+    private static File resultsDir;
 
     @Before
     public void setUp() throws IOException {
-        resultsDir = Files.createTempDirectory(ALLURE_RESULTS);
-        AllureResultsUtils.setResultsDirectory(resultsDir.toFile());
+        resultsDir = AllureFileUtils.createTempDirectory(ALLURE_RESULTS);
+        AllureResultsUtils.setResultsDirectory(resultsDir);
         List<String> suites = Lists.newArrayList();
         suites.add(getClass().getResource(SUITE1).getFile());
         suites.add(getClass().getResource(SUITE2).getFile());
@@ -55,30 +53,30 @@ public class AllureTestListenerMultipleSuitesTest {
     @After
     public void tearDown() throws IOException {
         AllureResultsUtils.setResultsDirectory(null);
-        AllureTestUtils.deleteNotEmptyDirectory(resultsDir);
+        AllureFileUtils.deleteDirectory(resultsDir);
     }
 
     @Test
     public void suiteFilesCountTest() throws Exception {
-        assertThat(listTestSuiteFiles(resultsDir.toFile()).size(), equalTo(2));
+        assertThat(listTestSuiteFiles(resultsDir).size(), equalTo(2));
     }
 
     @Test
     public void validateSuiteFilesTest() throws Exception {
         Validator validator = AllureModelUtils.getAllureSchemaValidator();
 
-        for (File each : listTestSuiteFiles(resultsDir.toFile())) {
+        for (File each : listTestSuiteFiles(resultsDir)) {
             validator.validate(new StreamSource(each));
         }
     }
-    
+
     @Test
     public void validatePendingTest() throws IOException {
-        TestSuiteResult testSuite = AllureFileUtils.unmarshalSuites(resultsDir.toFile()).get(0);
+        TestSuiteResult testSuite = AllureFileUtils.unmarshalSuites(resultsDir).get(0);
         TestCaseResult testResult = testSuite.getTestCases().get(0);
 
-        assertThat(testResult.getStatus(), equalTo(Status.PENDING));  
+        assertThat(testResult.getStatus(), equalTo(Status.PENDING));
         assertThat(testResult.getDescription().getValue(), equalTo("This is pending test"));
     }
-    
+
 }

@@ -4,6 +4,7 @@ import org.apache.tika.metadata.Metadata;
 import org.apache.tika.mime.MimeTypes;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import ru.yandex.qatools.allure.commons.AllureFileUtils;
 import ru.yandex.qatools.allure.config.AllureConfig;
 import ru.yandex.qatools.allure.exceptions.AllureException;
 import ru.yandex.qatools.allure.model.Attachment;
@@ -19,8 +20,8 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
 import java.util.UUID;
+
 
 import static javax.xml.bind.Marshaller.JAXB_ENCODING;
 import static javax.xml.bind.Marshaller.JAXB_FORMATTED_OUTPUT;
@@ -100,7 +101,7 @@ public final class AllureResultsUtils {
         ));
 
         try {
-            return Files.createTempDirectory("allure-results").toFile();
+            return AllureFileUtils.createTempDirectory("allure-results");
         } catch (IOException e) {
             throw new AllureException("Can't create results directory", e);
         }

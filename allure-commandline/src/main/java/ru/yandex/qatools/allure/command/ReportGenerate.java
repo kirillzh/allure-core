@@ -7,13 +7,13 @@ import org.apache.commons.exec.DefaultExecutor;
 import org.apache.commons.exec.util.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import ru.yandex.qatools.allure.commons.AllureFileUtils;
 
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.MalformedURLException;
-import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -32,7 +32,7 @@ public class ReportGenerate extends ReportCommand {
 
     public static final String MAIN = "ru.yandex.qatools.allure.AllureMain";
 
-    public static final String JAR_FILES = "*.jar";
+    public static final String JAR_FILES_REGEX = ".*\\.jar";
 
     @Arguments(title = "Results directories", required = true,
             description = "A list of input directories to be processed")
@@ -55,7 +55,7 @@ public class ReportGenerate extends ReportCommand {
      */
     protected void validateResultsDirectories() {
         for (String result : results) {
-            if (Files.notExists(Paths.get(result))) {
+            if (!(new File(result)).exists()) {
                 throw new AllureCommandException(String.format("Report directory <%s> not found.", result));
             }
         }
@@ -94,44 +94,45 @@ public class ReportGenerate extends ReportCommand {
         manifest.getMainAttributes().put(Attributes.Name.MAIN_CLASS, MAIN);
         manifest.getMainAttributes().put(Attributes.Name.CLASS_PATH, getClasspath());
 
-        Path jar = createTempDirectory("exec").resolve("generate.jar");
-        try (JarOutputStream output = new JarOutputStream(Files.newOutputStream(jar), manifest)) {
+        File jar = new File(createTempDirectory("exec"), "generate.jar");
+        try (JarOutputStream output = new JarOutputStream(new FileOutputStream(jar), manifest)) {
             output.putNextEntry(new JarEntry("allure.properties"));
-            Path allureConfig = PROPERTIES.getAllureConfig();
-            if (Files.exists(allureConfig)) {
-                byte[] bytes = Files.readAllBytes(allureConfig);
+            File allureConfig = PROPERTIES.getAllureConfig();
+            if (allureConfig.exists()) {
+                byte[] bytes = Files.readAllBytes(allureConfig.toPath());
                 output.write(bytes);
             }
             output.closeEntry();
         }
 
-        return jar.toAbsolutePath().toString();
+        return jar.getAbsolutePath();
     }
 
     /**
      * Returns the bundle jar classpath element.
      */
     protected String getBundleJarPath() throws MalformedURLException {
-        Path path = PROPERTIES.getAllureHome().resolve("app/allure-bundle.jar").toAbsolutePath();
-        if (Files.notExists(path)) {
+        File path = new File(PROPERTIES.getAllureHome().getAbsolutePath(), "app/allure-bundle.jar");
+        if (!path.exists()) {
             throw new AllureCommandException(String.format("Bundle not found by path <%s>", path));
         }
-        return path.toUri().toURL().toString();
+        return path.toURI().toString();
     }
 
     /**
      * Returns the plugins classpath elements.
      */
-    protected List<String> getPluginsPath() throws IOException {
+    protected List<String> getPluginsPath() {
         List<String> result = new ArrayList<>();
-        Path pluginsDirectory = PROPERTIES.getAllureHome().resolve("plugins").toAbsolutePath();
-        if (Files.notExists(pluginsDirectory)) {
+        File pluginsDirectory = new File(PROPERTIES.getAllureHome().getAbsolutePath(), "plugins");
+        if (!pluginsDirectory.exists()) {
             return Collections.emptyList();
         }
 
-        try (DirectoryStream<Path> plugins = Files.newDirectoryStream(pluginsDirectory, JAR_FILES)) {
-            for (Path plugin : plugins) {
-                result.add(plugin.toUri().toURL().toString());
+        File[] plugins = AllureFileUtils.listFiles(pluginsDirectory, JAR_FILES_REGEX);
+        if (plugins != null) {
+            for (File plugin : plugins) {
+                result.add(plugin.toURI().toString());
             }
         }
         return result;
@@ -157,7 +158,7 @@ public class ReportGenerate extends ReportCommand {
      */
     protected String getJavaExecutablePath() {
         String executableName = isWindows() ? "bin/java.exe" : "bin/java";
-        return PROPERTIES.getJavaHome().resolve(executableName).toAbsolutePath().toString();
+        return new File(PROPERTIES.getJavaHome(), executableName).getAbsolutePath();
     }
 
     /**

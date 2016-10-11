@@ -15,9 +15,8 @@ import ru.yandex.qatools.allure.testng.AllureTestListener.ConfigMethodType;
 import ru.yandex.qatools.allure.testng.testdata.ConfigMethodsTest;
 import ru.yandex.qatools.allure.utils.AllureResultsUtils;
 
+import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -34,14 +33,14 @@ public class AllureTestListenerConfigMethodsTest {
 
     private static final String ALLURE_RESULTS = "allure-results";
 
-    private static Path resultsDir;
+    private static File resultsDir;
 
     private static final String SUITE_PREFIX = "SUITE";
 
     @BeforeClass
     public static void setUp() throws IOException {
-        resultsDir = Files.createTempDirectory(ALLURE_RESULTS);
-        AllureResultsUtils.setResultsDirectory(resultsDir.toFile());
+        resultsDir = AllureFileUtils.createTempDirectory(ALLURE_RESULTS);
+        AllureResultsUtils.setResultsDirectory(resultsDir);
 
         List<XmlSuite> suites = new ArrayList<>();
         for (ConfigMethodType type : ConfigMethodType.values()) {
@@ -69,13 +68,13 @@ public class AllureTestListenerConfigMethodsTest {
     @AfterClass
     public static void tearDown() throws IOException {
         AllureResultsUtils.setResultsDirectory(null);
-        AllureTestUtils.deleteNotEmptyDirectory(resultsDir);
+        AllureFileUtils.deleteDirectory(resultsDir);
     }
 
 
     @Test
     public void validateCanceledTest() throws IOException {
-        List<TestSuiteResult> results = AllureFileUtils.unmarshalSuites(resultsDir.toFile());
+        List<TestSuiteResult> results = AllureFileUtils.unmarshalSuites(resultsDir);
         for (TestSuiteResult result : results) {
             validateTestSuiteResult(result);
         }
@@ -98,6 +97,5 @@ public class AllureTestListenerConfigMethodsTest {
                     status, equalTo(expectedStatus));
         }
     }
-
 
 }

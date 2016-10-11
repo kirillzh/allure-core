@@ -8,11 +8,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ru.qatools.properties.PropertyLoader;
 import ru.yandex.qatools.allure.CommandProperties;
-import ru.yandex.qatools.allure.utils.DeleteVisitor;
+import ru.yandex.qatools.allure.commons.AllureFileUtils;
 
+import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
 
 import static ru.yandex.qatools.allure.command.ExitCode.GENERIC_ERROR;
 import static ru.yandex.qatools.allure.command.ExitCode.NO_ERROR;
@@ -26,7 +25,7 @@ public abstract class AbstractCommand implements AllureCommand {
 
     private ExitCode exitCode = NO_ERROR;
 
-    private Path tempDirectory;
+    private File tempDirectory;
 
     @Option(name = {"-v", "--verbose"}, type = OptionType.GLOBAL,
             description = "Switch on the verbose mode.")
@@ -62,9 +61,9 @@ public abstract class AbstractCommand implements AllureCommand {
      * Creates an temporary directory. The created directory will be deleted when
      * command will ended.
      */
-    protected Path createTempDirectory(String prefix) {
+    File createTempDirectory(String prefix) {
         try {
-            return Files.createTempDirectory(tempDirectory, prefix);
+            return AllureFileUtils.createTempDirectory(tempDirectory, prefix);
         } catch (IOException e) {
             throw new AllureCommandException(e);
         }
@@ -75,7 +74,7 @@ public abstract class AbstractCommand implements AllureCommand {
      */
     private void initTempDirectory() {
         try {
-            tempDirectory = Files.createTempDirectory("allure-commandline");
+            tempDirectory = AllureFileUtils.createTempDirectory("allure-commandline");
         } catch (IOException e) {
             throw new AllureCommandException(e);
         }
@@ -85,12 +84,13 @@ public abstract class AbstractCommand implements AllureCommand {
      * Safe remove {@link #tempDirectory}.
      */
     private void removeTempDirectory() {
-        try {
-            if (tempDirectory != null && Files.exists(tempDirectory)) {
-                Files.walkFileTree(tempDirectory, new DeleteVisitor());
+        if (tempDirectory != null && tempDirectory.exists()) {
+            try {
+                AllureFileUtils.deleteDirectory(tempDirectory);
+                LOGGER.debug("Temp directory was successfully cleaned");
+            } catch (IOException e) {
+                LOGGER.debug("Could not clean temp directory");
             }
-        } catch (IOException e) {
-            LOGGER.debug("Could not clean temp directory", e);
         }
     }
 

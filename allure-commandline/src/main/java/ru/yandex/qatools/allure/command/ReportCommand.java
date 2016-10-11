@@ -3,8 +3,7 @@ package ru.yandex.qatools.allure.command;
 import io.airlift.airline.Option;
 import io.airlift.airline.OptionType;
 
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.io.File;
 
 /**
  * @author Artem Eroshenko <eroshenkoam@yandex-team.ru>
@@ -25,7 +24,7 @@ public abstract class ReportCommand extends AbstractCommand {
     /**
      * The path to the report directory {@link #getReportDirectory()}.
      */
-    protected Path getReportDirectoryPath() {
-        return Paths.get(getReportDirectory());
+    protected File getReportDirectoryPath() {
+        return new File(getReportDirectory());
     }
 }

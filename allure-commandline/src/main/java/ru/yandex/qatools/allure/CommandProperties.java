@@ -5,7 +5,7 @@ import ru.qatools.properties.Property;
 import ru.qatools.properties.Required;
 import ru.qatools.properties.Resource;
 
-import java.nio.file.Path;
+import java.io.File;
 
 /**
  * @author Artem Eroshenko <eroshenkoam@yandex-team.ru>
@@ -19,15 +19,15 @@ public interface CommandProperties {
 
     @Required
     @Property("java.home")
-    Path getJavaHome();
+    File getJavaHome();
 
     @Required
     @Property("allure.home")
-    Path getAllureHome();
+    File getAllureHome();
 
     @DefaultValue("allure.properties")
     @Property("allure.config")
-    Path getAllureConfig();
+    File getAllureConfig();
 
     @DefaultValue("-Xms128m")
     @Property("allure.bundle.javaOpts")

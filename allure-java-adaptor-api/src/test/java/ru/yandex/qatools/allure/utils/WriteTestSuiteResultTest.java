@@ -11,7 +11,6 @@ import ru.yandex.qatools.allure.model.TestSuiteResult;
 import javax.xml.transform.stream.StreamSource;
 import javax.xml.validation.Validator;
 import java.io.File;
-import java.nio.file.Files;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -52,14 +51,14 @@ public class WriteTestSuiteResultTest {
     }
 
     @Test
-    public void shouldCloseResultFileTest() throws Exception {
+    public void shouldCloseResultFileTest() {
         File resultFile = new File(folder.getRoot(), "suite.xml");
 
         AllureResultsUtils.writeTestSuiteResult(new TestSuiteResult(), resultFile);
 
         assertTrue(resultFile.exists());
 
-        Files.delete(resultFile.toPath());
+        assertTrue(resultFile.delete());
         assertFalse(resultFile.exists());
     }
 

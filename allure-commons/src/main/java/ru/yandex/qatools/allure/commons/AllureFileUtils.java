@@ -8,12 +8,7 @@ import ru.yandex.qatools.allure.config.AllureConfig;
 import ru.yandex.qatools.allure.model.TestSuiteResult;
 
 import javax.xml.bind.JAXB;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.Reader;
+import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -135,5 +130,62 @@ public final class AllureFileUtils {
             files.addAll(filesInDirectory);
         }
         return files;
+    }
+
+    public static void deleteDirectory(File directory) throws IOException {
+        if (directory != null && directory.exists()) {
+            File[] files = directory.listFiles();
+            if (files != null) {
+                for (File file : files) {
+                    if (file.isDirectory()) {
+                        deleteDirectory(file);
+                    } else {
+                        file.delete();
+                    }
+                }
+            }
+
+            if (!directory.delete()) {
+                throw new IOException("Failed to delete " + directory);
+            }
+        }
+    }
+
+    public static File createTempDirectory(String prefix) throws IOException {
+        return createTempDirectory(null, prefix);
+    }
+
+    public static File createTempDirectory(File dir, String prefix) throws IOException {
+        if (dir == null) {
+            dir = new File(System.getProperty("java.io.tmpdir"));
+        }
+
+        String baseName = String.format("%s%s", prefix, System.nanoTime());
+
+        File tempDir = new File(dir, baseName);
+        if (tempDir.mkdir()) {
+            return tempDir;
+        }
+        throw new IOException("Failed to create temporary directory " + tempDir.toString());
+    }
+
+    public static void createParentDirs(File file) throws IOException {
+        File parent = file.getCanonicalFile().getParentFile();
+        if (parent == null) {
+            return;
+        }
+        parent.mkdirs();
+        if (!parent.isDirectory()) {
+            throw new IOException("Unable to create parent directories of " + file);
+        }
+    }
+
+    public static File[] listFiles(File directory, final String regex) {
+        return directory.listFiles(new FilenameFilter() {
+            @Override
+            public boolean accept(File dir, String name) {
+                return name.matches(regex);
+            }
+        });
     }
 }
