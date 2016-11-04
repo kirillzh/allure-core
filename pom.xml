@@ -37,7 +37,6 @@
         <module>allure-report-face</module>
         <module>allure-bundle</module>
         <module>allure-commandline</module>
-        <!--<module>allure-report-preview</module>-->
     </modules>
 
     <organization>
